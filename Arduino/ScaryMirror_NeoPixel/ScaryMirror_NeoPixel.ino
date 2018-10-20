@@ -18,33 +18,39 @@
   #include <avr/power.h>
 #endif
 
-#define PIN 6
+#define NEOPIXEL_PIN 6
 
-// Pulse pin to avoid the power pack automatically shut down.
+//! Pulse pin to avoid the power pack automatically shut down.
 #define PULSE_PIN 5
-// Uses the builtin LED to monitor the pulse generation to keep the power bank
-// battery always on
+//! Uses the builtin LED to monitor the pulse generation to keep the power bank
+//! battery always on
 #define PULSE_MONITOR LED_BUILTIN
-// Pulse duration. Should be empirically calibrated on the power bank used
+//! Pulse duration. Should be empirically calibrated on the power bank used
 #define PULSE_MS 5
-// Interval between two pulses (long interval, about 1 second)
+//! Interval between two pulses (long interval, about 1 second)
 #define PULSE_INTERVAL 5000000
+//! Number of Neopixel LEDs in the strip
+#define NEOPIXEL_LEDS 144
 
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = Arduino pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(144 , PIN, NEO_GRB + NEO_KHZ800);
+/**
+    @note Note on Neopixel settings \n
+    Parameter 1 = number of pixels in strip \n
+    Parameter 2 = Arduino pin number (most are valid) \n
+    Parameter 3 = pixel type flags, add together as needed: \n
+    NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs) \n
+    NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers) \n
+    NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products) \n
+    NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2) \n
+    NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
+    
+    @warning To reduce NeoPixel burnout risk, add 1000 uF capacitor across
+    pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
+    and minimize distance between Arduino and first pixel.  Avoid connecting
+    on a live circuit...if you must, connect GND first.
+ */
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_LEDS , NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-// IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
-// pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
-// and minimize distance between Arduino and first pixel.  Avoid connecting
-// on a live circuit...if you must, connect GND first.
-
+//! Startup and initialization
 void setup() {
 
   strip.begin();
@@ -61,24 +67,109 @@ void setup() {
   Timer1.start();
 }
 
-void loop() {
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-//colorWipe(strip.Color(0, 0, 0, 255), 50); // White RGBW
-  // Send a theater pixel chase in...
-  theaterChase(strip.Color(127, 127, 127), 50); // White
-  theaterChase(strip.Color(127, 0, 0), 50); // Red
-  theaterChase(strip.Color(0, 0, 127), 50); // Blue
+// Predefined colors
+#define PINK strip.Color(255, 64, 64)
+#define WHITE strip.Color(255, 255, 255)
 
-  rainbow(20);
-  rainbowCycle(20);
-  theaterChaseRainbow(50);
+#define FIRE1 strip.Color(255, 64, 0)
+#define FIRE2 strip.Color(255, 96, 0)
+#define FIRE3 strip.Color(255, 128, 0)
+#define FIRE4 strip.Color(255, 96, 32)
+#define FIRE5 strip.Color(255, 32, 64)
+#define FIRE6 strip.Color(255, 32, 96)
+
+#define BLUE1 strip.Color(0, 0, 255)
+#define BLUE2 strip.Color(0, 32, 255)
+#define BLUE3 strip.Color(0, 64, 255)
+#define BLUE4 strip.Color(0, 96, 255)
+
+#define PURPLE1 strip.Color(96, 16, 255)
+#define PURPLE2 strip.Color(96, 16, 128)
+#define PURPLE3 strip.Color(96, 16, 96)
+#define PURPLE4 strip.Color(96, 16, 64)
+
+//! Main loop
+void loop() {
+
+    // ==========================================
+    // TEST COMMANDS
+    // ==========================================
+    
+    cmdFlash();
+    delay(2500);
+
+    // ==========================================
+    // TEST FUNCTIONS
+    // ==========================================
+
+    // Rotate the strip with one color on and off 
+    colorWipeOnOff(FIRE1, 10);
+    colorWipeOnOff(FIRE2, 10);
+    colorWipeOnOff(FIRE3, 10);
+
+    // Rotate the strip with one color
+    colorWipe(FIRE1, 10);
+    colorWipe(FIRE2, 10);
+    colorWipe(FIRE3, 10);
+    colorWipe(FIRE4, 10);
+    colorWipe(FIRE5, 10);
+    colorWipe(FIRE6, 10);
+
+    // Flash colors
+    colorFlash(FIRE1, 10);
+    colorFlash(FIRE2, 10);
+    colorFlash(FIRE3, 10);
+    colorFlash(FIRE4, 10);
+    colorFlash(FIRE5, 10);
+    colorFlash(FIRE6, 10);
+
+    // Fixed colors
+    setColor(FIRE1);
+    delay(1000);
+    setColor(FIRE2);
+    delay(1000);
+    setColor(FIRE3);
+    delay(1000);
+    setColor(FIRE4);
+    delay(1000);
+    setColor(FIRE5);
+    delay(1000);
+    setColor(FIRE6);
+    delay(1000);
+
+    setColor(BLUE1);
+    delay(500);
+    setColor(BLUE2);
+    delay(500);
+    setColor(BLUE3);
+    delay(500);
+    setColor(BLUE4);
+    delay(500);
+    
+    setColor(PURPLE1);
+    delay(500);
+    setColor(PURPLE2);
+    delay(500);
+    setColor(PURPLE1);
+    delay(500);
+    setColor(PURPLE4);
+    delay(500);
+
+//  rainbow(10);
+//  rainbowCycle(10);
+
 }
 
-// Timer callback function.
-// Stop the timer, output the pin for 20 ms then restart the timer
+/**
+ * Executes the specific command flashing the white light for
+ * a predefined time
+ */
+void cmdFlash() {
+    colorFlash(BLUE1, 1000);
+}
+
+//! Timer callback function.
+//! Stop the timer, output the pin for 20 ms then restart the timer
 void pulsePower(void)
 {
   Timer1.stop();
@@ -90,14 +181,45 @@ void pulsePower(void)
   Timer1.start();
 }
 
-
-// Fill the dots one after the other with a color
+//! Fill the dots one after the other with a color
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
     strip.show();
     delay(wait);
   }
+}
+
+//! Fill the dots one after the other with a color
+//! Then off in the same sequence
+void colorWipeOnOff(uint32_t c, uint8_t wait) {
+  // Pixels on
+  for(uint16_t i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+  // Pixels off
+  for(uint16_t i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, 0x00);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void colorFlash(uint32_t c, uint8_t wait) {
+    setColor(c);
+    delay(wait);
+    setColor(0);
+}
+
+void setColor(uint32_t c) {
+    uint16_t i;
+    
+    for(i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, c);
+    }
+    strip.show();
 }
 
 void rainbow(uint8_t wait) {
@@ -122,42 +244,6 @@ void rainbowCycle(uint8_t wait) {
     }
     strip.show();
     delay(wait);
-  }
-}
-
-//Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, c);    //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
   }
 }
 
